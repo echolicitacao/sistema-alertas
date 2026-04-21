@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Alertas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #F7F9FC; color: #2D3748; }
+  .topbar { background: #112244; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .topbar h1 { color: #fff; font-size: 16px; font-weight: bold; }
+  .topbar a { color: #B8CCF0; font-size: 13px; text-decoration: none; }
+  .topbar a:hover { color: #fff; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat { background: #fff; border-radius: 8px; padding: 20px 24px; border: 1px solid #E2E8F0; }
+  .stat-num { font-size: 32px; font-weight: bold; color: #1B3A6B; }
+  .stat-label { font-size: 12px; color: #718096; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .card { background: #fff; border-radius: 8px; border: 1px solid #E2E8F0; overflow: hidden; margin-bottom: 24px; }
+  .card-header { background: #1B3A6B; color: #fff; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .card-header h2 { font-size: 14px; font-weight: bold; }
+  .btn { display: inline-block; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; border: none; }
+  .btn-primary { background: #2251A3; color: #fff; }
+  .btn-primary:hover { background: #1B3A6B; }
+  .btn-success { background: #1A5C36; color: #fff; }
+  .btn-success:hover { background: #144D2D; }
+  .btn-warn { background: #92400E; color: #fff; font-size: 12px; padding: 6px 12px; }
+  .btn-sm { font-size: 12px; padding: 5px 10px; }
+  .btn-outline { background: transparent; border: 1px solid #CBD5E0; color: #4A5568; }
+  .btn-outline:hover { background: #F7F9FC; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #EBF0F8; color: #1B3A6B; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 16px; text-align: left; border-bottom: 2px solid #CBD5E0; }
+  td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #F0F4F8; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #F7F9FC; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+  .badge-ativo { background: #D1FAE5; color: #065F46; }
+  .badge-inativo { background: #FEE2E2; color: #991B1B; }
+  .badge-basico { background: #EBF0F8; color: #1B3A6B; }
+  .badge-intermediario { background: #FEF3C7; color: #92400E; }
+  .badge-avancado { background: #F3E8FF; color: #5B21B6; }
+  .flash-sucesso { background: #D1FAE5; border: 1px solid #6EE7B7; color: #065F46; border-radius: 6px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; }
+  .flash-erro { background: #FEE2E2; border: 1px solid #FCA5A5; color: #991B1B; border-radius: 6px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; }
+  .acoes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .empty { padding: 32px; text-align: center; color: #A0AEC0; font-size: 13px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Painel de Alertas</h1>
+  <div style="display:flex;gap:20px;align-items:center;">
+    <span style="color:#B8CCF0;font-size:12px;">
+      {% if ultimo_envio %}Último envio: {{ ultimo_envio[0][:16].replace('T',' ') }}{% else %}Nenhum envio ainda{% endif %}
+    </span>
+    <a href="/logout">Sair</a>
+  </div>
+</div>
+
+<div class="container">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <!-- ESTATÍSTICAS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">{{ usuarios|length }}</div>
+      <div class="stat-label">Total de usuários</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ ativos }}</div>
+      <div class="stat-label">Usuários ativos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ total_envios }}</div>
+      <div class="stat-label">Relatórios enviados</div>
+    </div>
+  </div>
+
+  <!-- TABELA DE USUÁRIOS -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Usuários Cadastrados</h2>
+      <div class="header-actions">
+        <form method="POST" action="/disparar-todos" style="display:inline;" onsubmit="return confirm('Enviar relatório para TODOS os usuários ativos agora?')">
+          <button type="submit" class="btn btn-success btn-sm">Enviar para Todos Agora</button>
+        </form>
+        <a href="/usuario/novo" class="btn btn-primary btn-sm">+ Novo Usuario</a>
+      </div>
+    </div>
+
+    {% if usuarios %}
+    <table>
+      <thead>
+        <tr>
+          <th>Nome / E-mail</th>
+          <th>Palavras-chave</th>
+          <th>Estados</th>
+          <th>Valor Min.</th>
+          <th>Plano</th>
+          <th>Status</th>
+          <th>Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        <tr>
+          <td>
+            <strong>{{ u.nome }}</strong><br>
+            <span style="color:#718096;font-size:12px;">{{ u.email }}</span>
+          </td>
+          <td style="max-width:180px;word-break:break-word;font-size:12px;color:#4A5568;">
+            {{ u.palavras[:80] }}{% if u.palavras|length > 80 %}…{% endif %}
+          </td>
+          <td style="font-size:12px;">{{ u.estados.replace(',', ', ') if u.estados else 'Todos' }}</td>
+          <td style="font-size:12px;white-space:nowrap;">
+            R$ {{ "{:,.0f}".format(u.valor_min).replace(",",".") }}
+          </td>
+          <td>
+            <span class="badge badge-{{ u.plano }}">{{ u.plano.capitalize() }}</span>
+          </td>
+          <td>
+            <span class="badge badge-{{ 'ativo' if u.ativo else 'inativo' }}">
+              {{ 'Ativo' if u.ativo else 'Inativo' }}
+            </span>
+          </td>
+          <td>
+            <div class="acoes">
+              <a href="/usuario/{{ u.id }}/editar" class="btn btn-outline btn-sm">Editar</a>
+              <a href="/usuario/{{ u.id }}/historico" class="btn btn-outline btn-sm">Historico</a>
+              <form method="POST" action="/usuario/{{ u.id }}/toggle" style="display:inline;">
+                <button type="submit" class="btn btn-outline btn-sm">{{ 'Desativar' if u.ativo else 'Ativar' }}</button>
+              </form>
+              <form method="POST" action="/usuario/{{ u.id }}/disparar" style="display:inline;" onsubmit="return confirm('Enviar relatório para {{ u.email }} agora?')">
+                <button type="submit" class="btn btn-success btn-sm">Enviar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">Nenhum usuário cadastrado ainda. <a href="/usuario/novo">Cadastrar o primeiro</a>.</div>
+    {% endif %}
+  </div>
+
+</div>
+</body>
+</html>

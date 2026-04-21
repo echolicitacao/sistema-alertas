@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ 'Editar' if usuario else 'Novo' }} Usuario</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #F7F9FC; color: #2D3748; }
+  .topbar { background: #112244; padding: 0 32px; display: flex; align-items: center; height: 56px; gap: 20px; }
+  .topbar h1 { color: #fff; font-size: 16px; }
+  .topbar a { color: #B8CCF0; font-size: 13px; text-decoration: none; }
+  .container { max-width: 680px; margin: 32px auto; padding: 0 24px; }
+  .card { background: #fff; border-radius: 8px; border: 1px solid #E2E8F0; overflow: hidden; }
+  .card-header { background: #1B3A6B; color: #fff; padding: 16px 28px; font-size: 14px; font-weight: bold; }
+  .card-body { padding: 28px; }
+  .form-group { margin-bottom: 20px; }
+  label { display: block; font-size: 12px; font-weight: bold; color: #4A5568; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .hint { font-size: 11px; color: #A0AEC0; font-weight: normal; text-transform: none; letter-spacing: 0; margin-top: 2px; }
+  input[type=text], input[type=email], input[type=number], select {
+    width: 100%; border: 1px solid #CBD5E0; border-radius: 6px; padding: 10px 12px; font-size: 14px; outline: none; transition: border 0.2s;
+  }
+  input:focus, select:focus { border-color: #1B3A6B; }
+  .estados-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .estado-item { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+  .estado-item input[type=checkbox] { width: auto; margin: 0; }
+  .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px; }
+  .btn { display: inline-block; padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none; border: none; }
+  .btn-primary { background: #1B3A6B; color: #fff; }
+  .btn-primary:hover { background: #2251A3; }
+  .btn-outline { background: #fff; border: 1px solid #CBD5E0; color: #4A5568; }
+  .btn-outline:hover { background: #F7F9FC; }
+  .flash-erro { background: #FEE2E2; border: 1px solid #FCA5A5; color: #991B1B; border-radius: 6px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; }
+  .selecionar-links { display: flex; gap: 12px; margin-bottom: 8px; }
+  .selecionar-links a { font-size: 12px; color: #2251A3; cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>{{ 'Editar Usuario' if usuario else 'Novo Usuario' }}</h1>
+  <a href="/">← Voltar ao painel</a>
+</div>
+
+<div class="container">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="card">
+    <div class="card-header">{{ 'Editar dados do usuario' if usuario else 'Cadastrar novo usuario' }}</div>
+    <div class="card-body">
+      <form method="POST">
+
+        <div class="form-group">
+          <label>Nome da Empresa / Contato</label>
+          <input type="text" name="nome" value="{{ usuario.nome if usuario else '' }}" placeholder="Ex: Construtora Silva Ltda" required>
+        </div>
+
+        <div class="form-group">
+          <label>E-mail para receber os relatórios</label>
+          <input type="email" name="email" value="{{ usuario.email if usuario else '' }}" placeholder="contato@empresa.com.br" required>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Palavras-chave de busca
+            <span class="hint">Separadas por vírgula. O relatório incluirá licitações que contenham ao menos uma dessas palavras no objeto.</span>
+          </label>
+          <input type="text" name="palavras"
+            value="{{ usuario.palavras if usuario else '' }}"
+            placeholder="Ex: construção, pavimentação, engenharia, elétrico, obras">
+        </div>
+
+        <div class="form-group">
+          <label>
+            Estados de interesse
+            <span class="hint">Selecione os estados. Se nenhum for selecionado, busca em todo o Brasil.</span>
+          </label>
+          <div class="selecionar-links">
+            <a onclick="document.querySelectorAll('.cb-estado').forEach(c=>c.checked=true)">Selecionar todos</a>
+            <a onclick="document.querySelectorAll('.cb-estado').forEach(c=>c.checked=false)">Limpar</a>
+          </div>
+          <div class="estados-grid">
+            {% set estados_selecionados = (usuario.estados.split(',') if usuario and usuario.estados else []) %}
+            {% for uf in estados %}
+            <label class="estado-item">
+              <input type="checkbox" class="cb-estado" name="estados" value="{{ uf }}"
+                {{ 'checked' if uf in estados_selecionados else '' }}>
+              {{ uf }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Valor mínimo (R$)
+            <span class="hint">Apenas licitações acima deste valor serão incluídas no relatório.</span>
+          </label>
+          <input type="number" name="valor_min" min="0" step="100000"
+            value="{{ usuario.valor_min|int if usuario else 1000000 }}"
+            placeholder="1000000">
+        </div>
+
+        <div class="form-group">
+          <label>Plano</label>
+          <select name="plano">
+            {% for p in ['basico', 'intermediario', 'avancado'] %}
+            <option value="{{ p }}" {{ 'selected' if usuario and usuario.plano == p else '' }}>
+              {{ p.capitalize() }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="btn-row">
+          <a href="/" class="btn btn-outline">Cancelar</a>
+          <button type="submit" class="btn btn-primary">
+            {{ 'Salvar alterações' if usuario else 'Cadastrar usuario' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Painel de Alertas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #F7F9FC; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,0.10); width: 100%; max-width: 380px; overflow: hidden; }
+  .card-header { background: #112244; padding: 28px 32px; }
+  .card-header h1 { color: #fff; font-size: 18px; margin-bottom: 4px; }
+  .card-header p { color: #B8CCF0; font-size: 12px; }
+  .card-body { padding: 28px 32px; }
+  label { display: block; font-size: 12px; font-weight: bold; color: #4A5568; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input { width: 100%; border: 1px solid #CBD5E0; border-radius: 6px; padding: 10px 12px; font-size: 14px; margin-bottom: 20px; outline: none; transition: border 0.2s; }
+  input:focus { border-color: #1B3A6B; }
+  button { width: 100%; background: #1B3A6B; color: #fff; border: none; border-radius: 6px; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+  button:hover { background: #2251A3; }
+  .flash { background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <h1>Painel de Alertas</h1>
+    <p>Acesso restrito ao operador</p>
+  </div>
+  <div class="card-body">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="POST">
+      <label>Usuário</label>
+      <input type="text" name="usuario" placeholder="admin" required autofocus>
+      <label>Senha</label>
+      <input type="password" name="senha" placeholder="••••••••" required>
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

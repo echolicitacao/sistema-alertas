@@ -1,0 +1,212 @@
+# GUIA DE INSTALAÇÃO — SISTEMA DE ALERTAS
+# Para Windows — Leia com calma, é mais simples do que parece
+
+═══════════════════════════════════════════════════════════════
+PARTE 1 — INSTALAR NO SEU COMPUTADOR (PARA TESTAR)
+═══════════════════════════════════════════════════════════════
+
+PASSO 1 — Instalar o Python
+────────────────────────────
+1. Acesse: https://www.python.org/downloads/
+2. Clique no botão amarelo grande "Download Python 3.x.x"
+3. Execute o instalador
+4. IMPORTANTE: marque a opção "Add Python to PATH" antes de clicar em Install
+5. Clique em "Install Now"
+
+
+PASSO 2 — Baixar os arquivos do sistema
+─────────────────────────────────────────
+1. Você recebeu uma pasta chamada "sistema_alertas"
+2. Coloque essa pasta em algum lugar fácil, por exemplo:
+   C:\sistema_alertas
+
+
+PASSO 3 — Abrir o terminal na pasta do sistema
+────────────────────────────────────────────────
+1. Abra a pasta "sistema_alertas" no Explorador de Arquivos
+2. Clique na barra de endereço (onde mostra o caminho da pasta)
+3. Digite: cmd
+4. Pressione Enter
+   → Uma janela preta vai abrir na pasta certa
+
+
+PASSO 4 — Instalar as dependências
+────────────────────────────────────
+Na janela preta (cmd), digite o comando abaixo e pressione Enter:
+
+    pip install -r requirements.txt
+
+Aguarde terminar. Você verá mensagens de instalação.
+
+
+PASSO 5 — Configurar o sistema
+────────────────────────────────
+1. Na pasta "sistema_alertas", encontre o arquivo ".env.exemplo"
+2. Copie e renomeie para ".env" (sem o ".exemplo")
+3. Abra o arquivo .env com o Bloco de Notas
+4. Troque a linha ADMIN_PASS pela senha que quiser
+5. Deixe o RESEND_API_KEY em branco por enquanto (pode testar sem)
+6. Salve o arquivo
+
+
+PASSO 6 — Iniciar o sistema
+────────────────────────────
+Na janela preta (cmd), digite:
+
+    python app.py
+
+Você verá:
+    Sistema iniciado. Painel em: http://localhost:5000
+
+Não feche essa janela enquanto estiver usando o sistema.
+
+
+PASSO 7 — Acessar o painel
+───────────────────────────
+1. Abra seu navegador (Chrome, Edge, etc.)
+2. Acesse: http://localhost:5000
+3. Login: admin
+4. Senha: a que você configurou no .env (padrão: admin123)
+
+PRONTO! O sistema está rodando no seu computador.
+
+
+═══════════════════════════════════════════════════════════════
+PARTE 2 — CONFIGURAR O E-MAIL (RESEND)
+═══════════════════════════════════════════════════════════════
+
+Para os e-mails serem enviados de verdade:
+
+1. Acesse: https://resend.com
+2. Clique em "Sign Up" e crie uma conta gratuita
+3. No painel do Resend, clique em "API Keys"
+4. Clique em "Create API Key"
+5. Copie a chave (começa com "re_...")
+6. Abra o arquivo .env e cole na linha:
+   RESEND_API_KEY=re_sua_chave_aqui
+
+Para o campo EMAIL_REMETENTE:
+- Se não tiver domínio próprio ainda, use: onboarding@resend.dev
+  (funciona para testes)
+- Quando tiver um domínio (ex: echoconsultoria.com.br), configure
+  em resend.com > Domains e use: alertas@echoconsultoria.com.br
+
+
+═══════════════════════════════════════════════════════════════
+PARTE 3 — COLOCAR NO AR (RAILWAY) — ACESSO DE QUALQUER LUGAR
+═══════════════════════════════════════════════════════════════
+
+Para o sistema rodar 24h e enviar os e-mails automaticamente
+toda segunda-feira, você precisa hospedá-lo. É gratuito.
+
+PASSO A — Criar conta no GitHub
+────────────────────────────────
+1. Acesse: https://github.com
+2. Clique em "Sign up" e crie uma conta gratuita
+
+
+PASSO B — Criar repositório e enviar os arquivos
+──────────────────────────────────────────────────
+1. No GitHub, clique em "New repository"
+2. Nome: sistema-alertas (pode ser privado — mais seguro)
+3. Clique em "Create repository"
+4. Siga as instruções que aparecem para "upload an existing folder"
+   (ou use o GitHub Desktop — mais fácil para quem não conhece Git)
+
+
+PASSO C — Criar conta no Railway
+──────────────────────────────────
+1. Acesse: https://railway.app
+2. Clique em "Login" → "Login with GitHub"
+3. Autorize o Railway a acessar sua conta GitHub
+
+
+PASSO D — Criar o projeto no Railway
+──────────────────────────────────────
+1. No Railway, clique em "New Project"
+2. Clique em "Deploy from GitHub repo"
+3. Selecione o repositório "sistema-alertas"
+4. O Railway vai detectar automaticamente que é Python e vai configurar
+
+
+PASSO E — Configurar as variáveis de ambiente
+───────────────────────────────────────────────
+No Railway, no seu projeto:
+1. Clique em "Variables"
+2. Adicione cada linha do seu arquivo .env:
+   SECRET_KEY = (valor)
+   ADMIN_USER = admin
+   ADMIN_PASS = (sua senha)
+   RESEND_API_KEY = (sua chave)
+   EMAIL_REMETENTE = (seu e-mail remetente)
+3. Clique em "Deploy"
+
+
+PASSO F — Acessar o sistema online
+────────────────────────────────────
+1. No Railway, clique em "Settings" → "Networking"
+2. Clique em "Generate Domain"
+3. Você receberá uma URL tipo: sistema-alertas.up.railway.app
+4. Acesse essa URL no navegador — seu sistema está no ar!
+
+IMPORTANTE: Anote essa URL. É ela que você vai usar daqui pra frente.
+O sistema funcionará automaticamente toda segunda-feira às 7h.
+
+
+═══════════════════════════════════════════════════════════════
+USANDO O PAINEL — RESUMO RÁPIDO
+═══════════════════════════════════════════════════════════════
+
+CADASTRAR UM CLIENTE:
+  1. Clique em "+ Novo Usuario"
+  2. Preencha nome e e-mail do cliente
+  3. Em "Palavras-chave", coloque os segmentos do cliente:
+     Ex: construção, pavimentação, obras, reforma, instalação
+  4. Selecione os estados de interesse
+  5. Defina o valor mínimo (padrão: R$ 1.000.000)
+  6. Escolha o plano (básico / intermediário / avançado)
+  7. Clique em "Cadastrar"
+
+ENVIAR RELATÓRIO MANUALMENTE:
+  - Na tabela, clique em "Enviar" na linha do cliente
+  - O relatório chega no e-mail em segundos
+
+VERIFICAR SE O E-MAIL FOI:
+  - Clique em "Histórico" na linha do cliente
+  - Você verá data, hora e quantas licitações foram enviadas
+
+DESATIVAR UM CLIENTE (sem excluir):
+  - Clique em "Desativar" na linha do cliente
+  - O sistema para de enviar para ele até você reativar
+
+ENVIO AUTOMÁTICO:
+  - Acontece toda segunda-feira às 7h automaticamente
+  - Você não precisa fazer nada
+
+
+═══════════════════════════════════════════════════════════════
+PROBLEMAS COMUNS
+═══════════════════════════════════════════════════════════════
+
+"python não é reconhecido como comando":
+  → Reinstale o Python marcando "Add Python to PATH"
+
+"ModuleNotFoundError":
+  → Rode novamente: pip install -r requirements.txt
+
+E-mail não chegando:
+  → Verifique se o RESEND_API_KEY está correto no .env
+  → Verifique a pasta de spam do destinatário
+  → No painel Resend, veja se o envio aparece no histórico deles
+
+Nenhuma licitação encontrada:
+  → Normal em algumas semanas — o PNCP nem sempre tem resultados
+    para todas as combinações de palavras-chave e estados
+  → Verifique se as palavras-chave do cliente estão corretas
+
+═══════════════════════════════════════════════════════════════
+SUPORTE
+═══════════════════════════════════════════════════════════════
+
+Dúvidas técnicas sobre Railway: railway.app/help
+Dúvidas sobre Resend: resend.com/docs
