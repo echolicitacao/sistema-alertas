@@ -320,11 +320,11 @@ if __name__ == "__main__":
     init_db()
 
     # Agendamento: toda segunda-feira às 7h
-    scheduler = BackgroundScheduler(timezone="America/Sao_Paulo")
+    
     scheduler.add_job(executar_envio_semanal, "cron", day_of_week="mon", hour=7, minute=0)
-    scheduler.start()
+    
     print("Sistema iniciado. Painel em: http://localhost:5000")
     print("Login: admin / admin123")
 
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
